@@ -20,6 +20,7 @@ export const Like = component$(
     //Local State 
     const likedStatus = useSignal(initialLikedStatus);
     const countNumber = useSignal(initialCount);
+    const timeOut = useSignal<ReturnType<typeof setTimeout> | null>(null);
 
     const actionSig = useTogglePostsLikes();
 
@@ -30,7 +31,7 @@ export const Like = component$(
     })
 
     return (
-      <Form action={actionSig} class="flex items-center group gap-1">
+      <Form class="flex items-center group gap-1" >
         <input type="hidden" name="postId" value={postId} />
         <Button
           title={likedStatus.value ? "Unlike" : "Like"}
@@ -42,7 +43,19 @@ export const Like = component$(
           colorScheme={likedStatus.value ? "btn-secondary" : "btn-ghost"}
           onClick$={(ev) => {
             ev.stopPropagation();
-            toggleLike();
+            try {
+              toggleLike();
+              if (timeOut.value) {
+                clearTimeout(timeOut.value);
+              }
+
+              timeOut.value = setTimeout(async () => {
+                await actionSig.submit({ postId: postId.toString() });
+              }, 100)
+            } catch (error) {
+              toggleLike();
+              console.log("Error while toggling like ", error);
+            }
           }}
         >
           {likedStatus.value ? <LikeIcon /> : <LikeOutlineIcon />}
@@ -52,7 +65,7 @@ export const Like = component$(
         >
           {countNumber.value}
         </div>
-      </Form>
+      </Form >
     );
   }
 );
