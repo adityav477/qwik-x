@@ -7,7 +7,7 @@ import { Form } from "@builder.io/qwik-city";
 export const Like = component$(
   ({
     postId,
-    isLiked: initialLikedStatus = false,
+    isLiked: initialLikedStatus,
     count: initialCount = 0,
     isLarge = false,
   }: {
@@ -45,13 +45,7 @@ export const Like = component$(
             ev.stopPropagation();
             try {
               toggleLike();
-              if (timeOut.value) {
-                clearTimeout(timeOut.value);
-              }
-
-              timeOut.value = setTimeout(async () => {
-                await actionSig.submit({ postId: postId.toString() });
-              }, 100)
+              actionSig.submit({ postId: postId.toString() });
             } catch (error) {
               toggleLike();
               console.log("Error while toggling like ", error);
